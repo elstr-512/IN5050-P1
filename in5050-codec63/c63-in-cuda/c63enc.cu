@@ -18,6 +18,8 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
+#include "gpu_me.h"
+
 static char *output_file, *input_file;
 FILE *outfile;
 
@@ -102,9 +104,13 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
   {
     /* Motion Estimation */
     c63_motion_estimate(cm);
-
     /* Motion Compensation */
     c63_motion_compensate(cm);
+
+    /* GPU Motion Estimation */
+    gpu_c63_motion_estimate(cm);
+    /* GPU Motion Compensation */
+    gpu_c63_motion_compensate(cm);
   }
 
   /* DCT and Quantization */
