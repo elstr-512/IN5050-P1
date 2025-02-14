@@ -81,6 +81,41 @@ static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
   return image;
 }
 
+static void debug_print_c63_fields(struct c63_common *cm)
+{
+  printf("\n\nDEBUG_PRINT_c63_fields:\n");
+  printf("width: %d\n", cm->width);
+  printf("height: %d\n", cm->height);
+  printf("mb_cols: %d\n", cm->mb_cols);
+  printf("mb_rows: %d\n", cm->mb_rows);
+  printf("me_search_range: %d\n", cm->me_search_range);
+ 
+  /*
+  int width, height;
+  int ypw, yph, upw, uph, vpw, vph;
+
+  int padw[COLOR_COMPONENTS], padh[COLOR_COMPONENTS];
+
+  int mb_cols, mb_rows;
+
+  uint8_t qp;                         // Quality parameter
+
+  int me_search_range;
+
+  uint8_t quanttbl[COLOR_COMPONENTS][64];
+
+  struct frame *refframe;
+  struct frame *curframe;
+
+  int framenum;
+
+  int keyframe_interval;
+  int frames_since_keyframe;
+
+  struct entropy_ctx e_ctx;
+  */
+}
+
 static void c63_encode_image(struct c63_common *cm, yuv_t *image)
 {
   /* Advance to next frame */
@@ -98,17 +133,23 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
   }
   else { cm->curframe->keyframe = 0; }
 
+  // NOTE: debug print
+  // debug_print_c63_fields(cm);
+
   if (!cm->curframe->keyframe)
   {
-    /* Motion Estimation */
-    c63_motion_estimate(cm);
-    /* Motion Compensation */
-    c63_motion_compensate(cm);
 
+    /* ~~~~ ~~~~ CPU ~~~~ ~~~~ */
+    /* Motion Estimation */
+    // c63_motion_estimate(cm);
+    /* Motion Compensation */
+    // c63_motion_compensate(cm);
+
+    /* ~~~~ ~~~~ GPU ~~~~ ~~~~ */
     /* GPU Motion Estimation */
     gpu_c63_motion_estimate(cm);
     /* GPU Motion Compensation */
-    // gpu_c63_motion_compensate(cm);
+    gpu_c63_motion_compensate(cm);
   }
 
   /* DCT and Quantization */
