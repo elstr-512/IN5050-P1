@@ -47,9 +47,11 @@ set(CMAKE_BUILD_TYPE Debug)
 if(CMAKE_C_COMPILER_ID STREQUAL GNU)
   if(EXISTS "/etc/nv_tegra_release")
     add_compile_options(-march=armv8.2-a)
+    add_compile_options(-arch=sm_50 -gencode=arch=compute_50,code=sm_50)
   endif()
 else()
   message(FATAL "Not compiling with an gcc")
+  add_compile_options(-arch=sm_50 -gencode=arch=compute_50,code=sm_50)
 endif()
 
 # This march option works with GCC but apparently not with the CUDA compiler on Tegra
