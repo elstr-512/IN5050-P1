@@ -43,11 +43,14 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
+typedef uint8_t* yuv_buf;
+
 struct yuv
 {
   uint8_t *Y;
   uint8_t *U;
   uint8_t *V;
+  yuv_buf buf;
 };
 
 struct dct
@@ -91,6 +94,17 @@ struct c63_common
   int ypw, yph, upw, uph, vpw, vph;
 
   int padw[COLOR_COMPONENTS], padh[COLOR_COMPONENTS];
+
+  /* Sub buf lengths - custom addition to c63 */
+  int y_buflen, u_buflen, v_buflen;
+
+  int total_yuv_buflen;
+
+  /* Entire buffer offsets */
+  int u_bufoff, v_bufoff;
+
+  /* Frame data lengths - custom addition to c63 */
+  int y_datalen, u_datalen, v_datalen;
 
   int mb_cols, mb_rows;
 

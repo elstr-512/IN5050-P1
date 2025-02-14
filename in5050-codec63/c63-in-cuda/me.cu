@@ -14,6 +14,10 @@
 #include "me.h"
 #include "tables.h"
 
+// extern int *vram_buf_A;
+// extern int *vram_buf_B;
+// extern int *vram_buf_C;
+
 static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int stride, int *result)
 {
   int u, v;
@@ -117,6 +121,62 @@ void c63_motion_estimate(struct c63_common *cm)
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Motion compensation for 8x8 block */
 static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
