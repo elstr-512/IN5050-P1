@@ -122,10 +122,10 @@ void c63_motion_estimate(struct c63_common *cm)
   }
 }
 
-
-
-
-
+__global__ void c63_motion_estimate_gpu(struct c63_common *cm) {
+  /* __syncthreads */
+  /* __syncwarp */
+}
 
 
 

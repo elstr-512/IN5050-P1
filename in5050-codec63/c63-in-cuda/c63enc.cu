@@ -78,8 +78,12 @@ static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
   return image;
 }
 
+__global__ static void gpu_motion_estimation() {
+  printf("Performing GPU motion estimation...\n");
+}
+
 static void c63_encode_image(struct c63_common *cm, yuv_t *image)
-{
+{  
   /* Advance to next frame */
   destroy_frame(cm->refframe);
   cm->refframe = cm->curframe;
@@ -98,13 +102,19 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
   if (!cm->curframe->keyframe)
   {
     /* Motion Estimation */
-    c63_motion_estimate(cm);
+    // c63_motion_estimate(cm);
+
+    /* Motion Estimation offloaded to the GPU */
+    gpu_motion_estimation<<<1, 1>>>();
+
+    // cudaMemcpy()
+
+    cudaDeviceSynchronize();
+    // cudaMemcpy()
 
     /* Motion Compensation */
     c63_motion_compensate(cm);
   }
-
-  cudaDeviceSynchronize();
 
   /* DCT and Quantization */
   dct_quantize(image->Y, cm->curframe->predicted->Y, cm->padw[Y_COMPONENT],
@@ -266,9 +276,9 @@ int main(int argc, char **argv)
   cm->e_ctx.fp = outfile;
 
   /* Allocating VRAM memory for image buffers */
-  cudaMalloc(&vram_buf_A, cm->total_yuv_buflen);
-  cudaMalloc(&vram_buf_B, cm->total_yuv_buflen);
-  cudaMalloc(&vram_buf_C, 1);
+  // cudaMalloc(&vram_buf_A, cm->total_yuv_buflen);
+  // cudaMalloc(&vram_buf_B, cm->total_yuv_buflen);
+  // cudaMalloc(&vram_buf_C, 1);
 
   /* Encode input frames */
   int numframes = 0;
