@@ -15,6 +15,9 @@
 #include "me.h"
 #include "tables.h"
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 static char *output_file, *input_file;
 FILE *outfile;
 

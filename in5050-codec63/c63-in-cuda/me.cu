@@ -14,6 +14,9 @@
 #include "me.h"
 #include "tables.h"
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int stride, int *result)
 {
   int u, v;
