@@ -28,9 +28,6 @@ extern int optind;
 extern char *optarg;
 
 /* Created pointer globals for VRAM memory */
-// int *vram_buf_A;
-// int *vram_buf_B;
-// int *vram_buf_C;
 
 /* Read planar YUV frames with 4:2:0 chroma sub-sampling */
 static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
@@ -43,7 +40,7 @@ static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
   img_yuv_buf = (yuv_buf)calloc(cm->total_yuv_buflen, 1);
 
   /* Read Y, U and V. U and V components are sampled 4:2:0 meaning 1/4 size of Y */
-  len += fread(img_yuv_buf, 1, cm->y_datalen, file);
+  len += fread(img_yuv_buf               , 1, cm->y_datalen, file);
   len += fread(img_yuv_buf + cm->u_bufoff, 1, cm->u_datalen, file);
   len += fread(img_yuv_buf + cm->v_bufoff, 1, cm->v_datalen, file);
 
@@ -55,7 +52,6 @@ static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
 
   if (feof(file))
   {
-
     free(img_yuv_buf);
     free(image);
     return NULL;
@@ -78,10 +74,6 @@ static yuv_t* read_yuv(FILE *file, struct c63_common *cm)
   return image;
 }
 
-__global__ static void gpu_motion_estimation() {
-  printf("Performing GPU motion estimation...\n");
-}
-
 static void c63_encode_image(struct c63_common *cm, yuv_t *image)
 {  
   /* Advance to next frame */
@@ -101,19 +93,7 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
 
   if (!cm->curframe->keyframe)
   {
-    /* Motion Estimation */
-    // c63_motion_estimate(cm);
-
-    /* Motion Estimation offloaded to the GPU */
-    gpu_motion_estimation<<<1, 1>>>();
-
-    // cudaMemcpy()
-
-    cudaDeviceSynchronize();
-    // cudaMemcpy()
-
-    /* Motion Compensation */
-    c63_motion_compensate(cm);
+    void c63_estimate_compensate(cm);
   }
 
   /* DCT and Quantization */
@@ -179,6 +159,13 @@ struct c63_common* init_c63_enc(int width, int height)
   cm->mb_cols = cm->ypw / 8;
   cm->mb_rows = cm->yph / 8;
 
+  cm->uv_mb_cols = cm->mb_cols / 4;
+  cm->uv_mb_rows = cm->mb_rows / 4;
+
+  cm->y_mb_buflen = cm->mb_rows * cm->mb_cols * sizeof(struct macroblock);
+  cm->u_mb_buflen = cm->y_mb_buflen / 4;
+  cm->v_mb_buflen = cm->u_mb_buflen;
+
   /* Quality parameters -- Home exam deliveries should have original values,
    i.e., quantization factor should be 25, search range should be 16, and the
    keyframe interval should be 100. */
@@ -201,6 +188,90 @@ void free_c63_enc(struct c63_common* cm)
 {
   destroy_frame(cm->curframe);
   free(cm);
+}
+
+struct c63_common *d_cm;
+struct frame *d_refframe, *d_curframe;
+
+yuv_t *d_curframe_orig, *d_refframe_recons, // Computing from this (copied from host per frame)
+  *d_curframe_predicted; // Computing into this and copying back
+yuv_buf *d_curframe_origbuf, *d_refframe_reconsbuf,
+  *d_curframe_predictedbuf;
+
+struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
+
+void init_device_state(struct c63_common *cm) {
+  /* Allocating necessary memory on the device */
+  cudaMalloc(&d_cm, sizeof(struct c63_common));
+
+  cudaMalloc(&d_refframe, sizeof(struct frame));
+  cudaMalloc(&d_curframe, sizeof(struct frame));
+  
+  cudaMalloc(&d_curframe_orig, sizeof(struct yuv));
+  cudaMalloc(&d_refframe_recons, sizeof(struct yuv));
+  cudaMalloc(&d_curframe_predicted, sizeof(struct yuv));
+
+  cudaMalloc(&d_curframe_origbuf, cm->total_yuv_buflen);
+  cudaMalloc(&d_refframe_reconsbuf, cm->total_yuv_buflen);
+  cudaMalloc(&d_curframe_predictedbuf, cm->total_yuv_buflen);
+
+  cudaMalloc(&d_curframe_mby, cm->y_mb_buflen);
+  cudaMalloc(&d_curframe_mbu, cm->u_mb_buflen);
+  cudaMalloc(&d_curframe_mbv, cm->v_mb_buflen);
+
+  /* Initializing device memory structures */
+  cudaMemcpy(&d_cm, cm, sizeof(struct c63_common), cudaMemcpyHostToDevice);
+
+  cudaMemcpy(&d_cm->refframe, &d_refframe, sizeof(d_refframe), cudaMemcpyHostToDevice);
+  cudaMemcpy(&d_cm->curframe, &d_curframe, sizeof(d_curframe), cudaMemcpyHostToDevice);
+
+  cudaMemcpy(&d_curframe->orig, &d_curframe_orig, sizeof(d_curframe_orig), cudaMemcpyHostToDevice);
+  cudaMemcpy(&d_refframe->recons, &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
+  cudaMemcpy(&d_curframe->predicted, &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
+
+  struct yuv curframe_orig_yuv = {
+    .Y   = d_curframe_origbuf,
+    .U   = d_curframe_origbuf + cm->u_bufoff,
+    .V   = d_curframe_origbuf + cm->v_bufoff,
+    .buf = d_curframe_origbuf
+  };
+
+  struct yuv refframe_recons_yuv = {
+    .Y   = d_refframe_reconsbuf,
+    .U   = d_refframe_reconsbuf + cm->u_bufoff,
+    .V   = d_refframe_reconsbuf + cm->v_bufoff,
+    .buf = d_refframe_reconsbuf
+  };
+  
+  struct yuv curframe_predicted_yuv = {
+    .Y   = d_curframe_predictedbuf,
+    .U   = d_curframe_predictedbuf + cm->u_bufoff,
+    .V   = d_curframe_predictedbuf + cm->v_bufoff,
+    .buf = d_curframe_predictedbuf
+  };
+
+  cudaMemcpy(d_curframe_orig, &curframe_orig_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_refframe_recons, &refframe_recons_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_curframe_predicted, &curframe_predicted_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+
+  cudaMemcpy(&d_curframe->mbs[Y_COMPONENT], &d_curframe_mby, sizeof(d_curframe_mby), cudaMemcpyHostToDevice);
+  cudaMemcpy(&d_curframe->mbs[U_COMPONENT], &d_curframe_mbu, sizeof(d_curframe_mbu), cudaMemcpyHostToDevice);
+  cudaMemcpy(&d_curframe->mbs[V_COMPONENT], &d_curframe_mbv, sizeof(d_curframe_mbv), cudaMemcpyHostToDevice);
+}
+
+void fini_device_state() {
+  cudaFree(d_cm);
+  cudaFree(d_refframe);
+  cudaFree(d_curframe);
+  cudaFree(d_curframe_orig);
+  cudaFree(d_refframe_recons);
+  cudaFree(d_curframe_predicted);
+  cudaFree(d_curframe_origbuf);
+  cudaFree(d_refframe_reconsbuf);
+  cudaFree(d_curframe_predictedbuf);
+  cudaFree(d_curframe_mby);
+  cudaFree(d_curframe_mbu);
+  cudaFree(d_curframe_mbv);
 }
 
 static void print_help()
@@ -275,10 +346,8 @@ int main(int argc, char **argv)
   struct c63_common *cm = init_c63_enc(width, height);
   cm->e_ctx.fp = outfile;
 
-  /* Allocating VRAM memory for image buffers */
-  // cudaMalloc(&vram_buf_A, cm->total_yuv_buflen);
-  // cudaMalloc(&vram_buf_B, cm->total_yuv_buflen);
-  // cudaMalloc(&vram_buf_C, 1);
+  /* Initialize device state */
+  init_device_state(cm);
 
   /* Encode input frames */
   int numframes = 0;
@@ -302,24 +371,10 @@ int main(int argc, char **argv)
     if (limit_numframes && numframes >= limit_numframes) { break; }
   }
 
-  // cudaFree(vram_buf_A);
-  // cudaFree(vram_buf_B);
-  // cudaFree(vram_buf_C);
-  
+  fini_device_State();
   free_c63_enc(cm);
   fclose(outfile);
   fclose(infile);
-
-  //int i, j;
-  //for (i = 0; i < 2; ++i)
-  //{
-  //  printf("int freq[] = {");
-  //  for (j = 0; j < ARRAY_SIZE(frequencies[i]); ++j)
-  //  {
-  //    printf("%d, ", frequencies[i][j]);
-  //  }
-  //  printf("};\n");
-  //}
 
   return EXIT_SUCCESS;
 }

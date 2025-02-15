@@ -97,8 +97,7 @@ struct c63_common
 
   /* Sub buf lengths - custom addition to c63 */
   int y_buflen, u_buflen, v_buflen;
-
-  int total_yuv_buflen;
+  int total_yuv_buflen; // Sum of y, u and v buflens 
 
   /* Entire buffer offsets */
   int u_bufoff, v_bufoff;
@@ -107,6 +106,14 @@ struct c63_common
   int y_datalen, u_datalen, v_datalen;
 
   int mb_cols, mb_rows;
+
+  int uv_mb_rows;
+  int uv_mb_cols;
+
+  /* Color macroblock buffer sizes - custom addition to c63 */
+  int y_mb_buflen;
+  int u_mb_buflen;
+  int v_mb_buflen;
 
   uint8_t qp;                         // Quality parameter
 
