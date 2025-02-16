@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #include "c63.h"
 #include "c63_write.h"
@@ -93,7 +94,7 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
 
   if (!cm->curframe->keyframe)
   {
-    void c63_estimate_compensate(cm);
+    c63_estimate_compensate(cm);
   }
 
   /* DCT and Quantization */
@@ -195,12 +196,12 @@ struct frame *d_refframe, *d_curframe;
 
 yuv_t *d_curframe_orig, *d_refframe_recons, // Computing from this (copied from host per frame)
   *d_curframe_predicted; // Computing into this and copying back
-yuv_buf *d_curframe_origbuf, *d_refframe_reconsbuf,
-  *d_curframe_predictedbuf;
+yuv_buf d_curframe_origbuf, d_refframe_reconsbuf,
+  d_curframe_predictedbuf;
 
 struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
 
-void init_device_state(struct c63_common *cm) {
+void init_device_state(struct c63_common *cm) {  
   /* Allocating necessary memory on the device */
   cudaMalloc(&d_cm, sizeof(struct c63_common));
 
@@ -220,33 +221,33 @@ void init_device_state(struct c63_common *cm) {
   cudaMalloc(&d_curframe_mbv, cm->v_mb_buflen);
 
   /* Initializing device memory structures */
-  cudaMemcpy(&d_cm, cm, sizeof(struct c63_common), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_cm, cm, sizeof(struct c63_common), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(&d_cm->refframe, &d_refframe, sizeof(d_refframe), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_cm->curframe, &d_curframe, sizeof(d_curframe), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_cm + offsetof(struct c63_common, refframe), &d_refframe, sizeof(d_refframe), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_cm + offsetof(struct c63_common, curframe), &d_curframe, sizeof(d_curframe), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(&d_curframe->orig, &d_curframe_orig, sizeof(d_curframe_orig), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_refframe->recons, &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_curframe->predicted, &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
+  cudaMemcpy(d_curframe + offsetof(struct frame, orig), &d_curframe_orig, sizeof(d_curframe_orig), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_refframe + offsetof(struct frame, recons), &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_curframe + offsetof(struct frame, predicted), &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
 
   struct yuv curframe_orig_yuv = {
-    .Y   = d_curframe_origbuf,
-    .U   = d_curframe_origbuf + cm->u_bufoff,
-    .V   = d_curframe_origbuf + cm->v_bufoff,
+    .Y   = (uint8_t*)d_curframe_origbuf,
+    .U   = (uint8_t*)d_curframe_origbuf + cm->u_bufoff,
+    .V   = (uint8_t*)d_curframe_origbuf + cm->v_bufoff,
     .buf = d_curframe_origbuf
   };
 
   struct yuv refframe_recons_yuv = {
-    .Y   = d_refframe_reconsbuf,
-    .U   = d_refframe_reconsbuf + cm->u_bufoff,
-    .V   = d_refframe_reconsbuf + cm->v_bufoff,
+    .Y   = (uint8_t*)d_refframe_reconsbuf,
+    .U   = (uint8_t*)d_refframe_reconsbuf + cm->u_bufoff,
+    .V   = (uint8_t*)d_refframe_reconsbuf + cm->v_bufoff,
     .buf = d_refframe_reconsbuf
   };
   
   struct yuv curframe_predicted_yuv = {
-    .Y   = d_curframe_predictedbuf,
-    .U   = d_curframe_predictedbuf + cm->u_bufoff,
-    .V   = d_curframe_predictedbuf + cm->v_bufoff,
+    .Y   = (uint8_t*)d_curframe_predictedbuf,
+    .U   = (uint8_t*)d_curframe_predictedbuf + cm->u_bufoff,
+    .V   = (uint8_t*)d_curframe_predictedbuf + cm->v_bufoff,
     .buf = d_curframe_predictedbuf
   };
 
@@ -254,9 +255,23 @@ void init_device_state(struct c63_common *cm) {
   cudaMemcpy(d_refframe_recons, &refframe_recons_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
   cudaMemcpy(d_curframe_predicted, &curframe_predicted_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(&d_curframe->mbs[Y_COMPONENT], &d_curframe_mby, sizeof(d_curframe_mby), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_curframe->mbs[U_COMPONENT], &d_curframe_mbu, sizeof(d_curframe_mbu), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_curframe->mbs[V_COMPONENT], &d_curframe_mbv, sizeof(d_curframe_mbv), cudaMemcpyHostToDevice);
+  cudaMemcpy(
+    d_curframe + offsetof(struct frame, mbs), 
+    &d_curframe_mby, sizeof(d_curframe_mby), 
+    cudaMemcpyHostToDevice
+  );
+  
+  cudaMemcpy(
+    d_curframe + offsetof(struct frame, mbs) + sizeof(struct macroblock*), 
+    &d_curframe_mbu, sizeof(d_curframe_mbu), 
+    cudaMemcpyHostToDevice
+  );
+  
+  cudaMemcpy(
+    d_curframe + offsetof(struct frame, mbs) + 2 * sizeof(struct macroblock*), 
+    &d_curframe_mbv, sizeof(d_curframe_mbv), 
+    cudaMemcpyHostToDevice
+  );
 }
 
 void fini_device_state() {
@@ -371,7 +386,7 @@ int main(int argc, char **argv)
     if (limit_numframes && numframes >= limit_numframes) { break; }
   }
 
-  fini_device_State();
+  fini_device_state();
   free_c63_enc(cm);
   fclose(outfile);
   fclose(infile);

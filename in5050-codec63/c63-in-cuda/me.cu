@@ -28,13 +28,13 @@ __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int strid
 {
   __shared__ int part_sad_sums[2];
 
-  int lane_index = threadIdx.x
+  int lane_index = threadIdx.x;
   int warp_index = threadIdx.y;
   int tid = threadIdx.x + threadIdx.y * blockDim.x;
 
   __syncwarp();
 
-  int shuffled_result = abs(block2[warp_index*stride+lane_index] - block1[warp_index*stride+lane_index])
+  int shuffled_result = abs(block2[warp_index*stride+lane_index] - block1[warp_index*stride+lane_index]);
 
   for (int offset = 16; offset > 0; offset /= 2) {
     shuffled_result += __shfl_down_sync(SHUFFLE_FULL_MASK, shuffled_result, offset);
@@ -203,7 +203,7 @@ void c63_estimate_compensate(struct c63_common *cm) {
   dim3 grid(cm->mb_cols, cm->mb_rows, 3);
   dim3 blk(32, 2, 1);
 
-  c63_estimate_compensate <<< grid, blk >>>(d_cm);
+  c63_estimate_compensate_gpu<<<grid, blk>>>(d_cm);
 
   cudaDeviceSynchronize();
 
