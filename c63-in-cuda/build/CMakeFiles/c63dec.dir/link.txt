@@ -1,1 +1,0 @@
-/usr/bin/g++-13 -Wl,--dependency-file=CMakeFiles/c63dec.dir/link.d @CMakeFiles/c63dec.dir/objects1.rsp -o c63dec @CMakeFiles/c63dec.dir/linkLibs.rsp -L"/opt/cuda/targets/x86_64-linux/lib/stubs" -L"/opt/cuda/targets/x86_64-linux/lib"
