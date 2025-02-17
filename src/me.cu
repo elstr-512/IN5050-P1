@@ -1,3 +1,4 @@
+// clang-format off
 #include <assert.h>
 #include <errno.h>
 #include <getopt.h>
@@ -11,6 +12,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "c63.h"
 #include "me.h"
 #include "tables.h"
 
@@ -180,6 +182,41 @@ void c63_motion_compensate(struct c63_common *cm)
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
 /*                  CUDA SECTION                      */
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
+
+// Comment to diable
+#define LINE_ERR
+
+#ifdef LINE_ERR
+#define LINE_CHECK()                                                           \
+  {                                                                            \
+    printf("\n(in %s at line %d)\n", __FILE__, __LINE__);                      \
+  }
+
+#else
+#define LINE_CHECK()
+#endif
+
+/**************** CUDA ERR DEBUG ****************/
+
+// Comment to diable
+#define DEBUG_ERR_CUDA
+
+// Cuda error check macro
+#ifdef DEBUG_CUDA
+#define CUDA_ERR_CHECK()                                                       \
+  {                                                                            \
+    cudaDeviceSynchronize();                                                   \
+    cudaError_t err = cudaGetLastError();                                      \
+    if (err != cudaSuccess) {                                                  \
+      printf("\nCuda err: %s (in %s at line %d)\n", cudaGetErrorString(err),   \
+             __FILE__, __LINE__);                                              \
+    }                                                                          \
+  }
+#else
+#define CUDA_ERR_CHECK() // Macro does nothing when DEBUG_CUDA is not defined
+#endif
+/**************** CUDA ERR DEBUG ****************/
+
 
 static void gpu_sad_block_8x8()
 {
