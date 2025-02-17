@@ -229,15 +229,85 @@ static void gpu_me_block_8x8()
 
 }
 
-__global__ static void gpu_c63_motion_estimate_kernel()
-{
+#define BLOCK_SIZE 8  // Process 8x8 macroblocks
 
+__device__ int gpu_compute_sad_8x8(uint8_t *orig, uint8_t *ref, int stride)
+{
+    int sad = 0;
+    for (int v = 0; v < 8; ++v)
+    {
+        for (int u = 0; u < 8; ++u)
+        {
+            sad += abs(orig[v * stride + u] - ref[v * stride + u]);
+        }
+    }
+    return sad;
+}
+
+__global__ void gpu_c63_motion_estimate_kernel(uint8_t *orig, uint8_t *ref, struct macroblock *mbs,
+                                               int w, int h, int range, int mb_cols)
+{
+    int mb_x = blockIdx.x;
+    int mb_y = blockIdx.y;
+    int mb_index = mb_y * mb_cols + mb_x;
+
+    int mx = mb_x * BLOCK_SIZE;
+    int my = mb_y * BLOCK_SIZE;
+    
+    int best_sad = INT_MAX;
+    int best_mv_x = 0, best_mv_y = 0;
+
+    int left = max(mx - range, 0);
+    int top = max(my - range, 0);
+    int right = min(mx + range, w - BLOCK_SIZE);
+    int bottom = min(my + range, h - BLOCK_SIZE);
+
+    for (int y = top; y < bottom; ++y)
+    {
+        for (int x = left; x < right; ++x)
+        {
+            int sad = gpu_compute_sad_8x8(&orig[my * w + mx], &ref[y * w + x], w);
+            if (sad < best_sad)
+            {
+                best_sad = sad;
+                best_mv_x = x - mx;
+                best_mv_y = y - my;
+            }
+        }
+    }
+
+    mbs[mb_index].mv_x = best_mv_x;
+    mbs[mb_index].mv_y = best_mv_y;
+    mbs[mb_index].use_mv = 1;
 }
 
 void gpu_c63_motion_estimate(struct c63_common *cm)
 {
+    uint8_t *d_orig, *d_ref;
+    struct macroblock *d_mbs;
+    
+    int size_y = cm->padw[Y_COMPONENT] * cm->padh[Y_COMPONENT];
+    int mb_size = cm->mb_rows * cm->mb_cols * sizeof(struct macroblock);
 
+    cudaMalloc(&d_orig, size_y);
+    cudaMalloc(&d_ref, size_y);
+    cudaMalloc(&d_mbs, mb_size);
+
+    cudaMemcpy(d_orig, cm->curframe->orig->Y, size_y, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_ref, cm->refframe->recons->Y, size_y, cudaMemcpyHostToDevice);
+
+    dim3 grid(cm->mb_cols, cm->mb_rows);
+    gpu_c63_motion_estimate_kernel<<<grid, 1>>>(d_orig, d_ref, d_mbs,
+                                               cm->padw[Y_COMPONENT], cm->padh[Y_COMPONENT],
+                                               cm->me_search_range, cm->mb_cols);
+    
+    cudaMemcpy(cm->curframe->mbs[Y_COMPONENT], d_mbs, mb_size, cudaMemcpyDeviceToHost);
+    
+    cudaFree(d_orig);
+    cudaFree(d_ref);
+    cudaFree(d_mbs);
 }
+
 
 /* Motion compensation for 8x8 block */
 static void gpu_mc_block_8x8()

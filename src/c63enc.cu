@@ -140,17 +140,18 @@ static void c63_encode_image(struct c63_common *cm, yuv_t *image)
   if (!cm->curframe->keyframe)
   {
 
+    // c63_motion_estimate(cm);
+    gpu_c63_motion_estimate(cm);
+    c63_motion_compensate(cm);
+    // gpu_c63_motion_compensate(cm);
+
     /* ~~~~ ~~~~ CPU ~~~~ ~~~~ */
     /* Motion Estimation */
-    c63_motion_estimate(cm);
     /* Motion Compensation */
-    c63_motion_compensate(cm);
 
     /* ~~~~ ~~~~ GPU ~~~~ ~~~~ */
     /* GPU Motion Estimation */
-    // gpu_c63_motion_estimate(cm);
     /* GPU Motion Compensation */
-    // gpu_c63_motion_compensate(cm);
   }
 
   /* DCT and Quantization */
