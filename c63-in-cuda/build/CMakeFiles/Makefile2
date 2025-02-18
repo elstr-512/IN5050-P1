@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda
+CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build
+CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -94,14 +94,14 @@ clean: CMakeFiles/c63pred.dir/clean
 CMakeFiles/c63.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63.dir/build.make CMakeFiles/c63.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63.dir/build.make CMakeFiles/c63.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target c63"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target c63"
 .PHONY : CMakeFiles/c63.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/c63.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/c63.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 0
 .PHONY : CMakeFiles/c63.dir/rule
 
 # Convenience name for target.
@@ -111,7 +111,7 @@ c63: CMakeFiles/c63.dir/rule
 # codegen rule for target.
 CMakeFiles/c63.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63.dir/build.make CMakeFiles/c63.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Finished codegen for target c63"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Finished codegen for target c63"
 .PHONY : CMakeFiles/c63.dir/codegen
 
 # clean rule for target.
@@ -126,14 +126,14 @@ CMakeFiles/c63.dir/clean:
 CMakeFiles/c63enc.dir/all: CMakeFiles/c63.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63enc.dir/build.make CMakeFiles/c63enc.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63enc.dir/build.make CMakeFiles/c63enc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=9,10,11 "Built target c63enc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=9,10,11 "Built target c63enc"
 .PHONY : CMakeFiles/c63enc.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/c63enc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/c63enc.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 0
 .PHONY : CMakeFiles/c63enc.dir/rule
 
 # Convenience name for target.
@@ -143,7 +143,7 @@ c63enc: CMakeFiles/c63enc.dir/rule
 # codegen rule for target.
 CMakeFiles/c63enc.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63enc.dir/build.make CMakeFiles/c63enc.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=9,10,11 "Finished codegen for target c63enc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=9,10,11 "Finished codegen for target c63enc"
 .PHONY : CMakeFiles/c63enc.dir/codegen
 
 # clean rule for target.
@@ -158,14 +158,14 @@ CMakeFiles/c63enc.dir/clean:
 CMakeFiles/c63dec.dir/all: CMakeFiles/c63.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63dec.dir/build.make CMakeFiles/c63dec.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63dec.dir/build.make CMakeFiles/c63dec.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=7,8 "Built target c63dec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=7,8 "Built target c63dec"
 .PHONY : CMakeFiles/c63dec.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/c63dec.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/c63dec.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 0
 .PHONY : CMakeFiles/c63dec.dir/rule
 
 # Convenience name for target.
@@ -175,7 +175,7 @@ c63dec: CMakeFiles/c63dec.dir/rule
 # codegen rule for target.
 CMakeFiles/c63dec.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63dec.dir/build.make CMakeFiles/c63dec.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=7,8 "Finished codegen for target c63dec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=7,8 "Finished codegen for target c63dec"
 .PHONY : CMakeFiles/c63dec.dir/codegen
 
 # clean rule for target.
@@ -190,14 +190,14 @@ CMakeFiles/c63dec.dir/clean:
 CMakeFiles/c63pred.dir/all: CMakeFiles/c63.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63pred.dir/build.make CMakeFiles/c63pred.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63pred.dir/build.make CMakeFiles/c63pred.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=12,13 "Built target c63pred"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=12,13 "Built target c63pred"
 .PHONY : CMakeFiles/c63pred.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/c63pred.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/c63pred.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 0
 .PHONY : CMakeFiles/c63pred.dir/rule
 
 # Convenience name for target.
@@ -207,7 +207,7 @@ c63pred: CMakeFiles/c63pred.dir/rule
 # codegen rule for target.
 CMakeFiles/c63pred.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/c63pred.dir/build.make CMakeFiles/c63pred.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=12,13 "Finished codegen for target c63pred"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=12,13 "Finished codegen for target c63pred"
 .PHONY : CMakeFiles/c63pred.dir/codegen
 
 # clean rule for target.

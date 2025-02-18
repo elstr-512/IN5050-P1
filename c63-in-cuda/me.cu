@@ -11,6 +11,9 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include <time.h>
+
+#include "common.h"
 #include "me.h"
 #include "tables.h"
 
@@ -28,13 +31,13 @@ __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int strid
 {
   __shared__ int part_sad_sums[2];
 
-  int lane_index = threadIdx.x;
-  int warp_index = threadIdx.y;
   int tid = threadIdx.x + threadIdx.y * blockDim.x;
+  int lane_index = tid & 0x1f;
+  int warp_index = tid / 32;
 
   __syncwarp();
 
-  int shuffled_result = abs(block2[warp_index*stride+lane_index] - block1[warp_index*stride+lane_index]);
+  int shuffled_result = abs(block2[stride * threadIdx.y + threadIdx.x] - block1[stride * threadIdx.y + threadIdx.x]);
 
   for (int offset = 16; offset > 0; offset /= 2) {
     shuffled_result += __shfl_down_sync(SHUFFLE_FULL_MASK, shuffled_result, offset);
@@ -115,9 +118,9 @@ __device__ static void me_block_8x8(
 
 __device__ void c63_motion_estimate_gpu(struct c63_common *cm) {
   // /* Compare this frame with previous reconstructed frame */
-  int color_component = gridDim.z;
-  int mb_x = gridDim.x;
-  int mb_y = gridDim.y;
+  int color_component = blockIdx.z;
+  int mb_x = blockIdx.x;
+  int mb_y = blockIdx.y;
 
   if (color_component == 0) {
     // Y component
@@ -144,20 +147,17 @@ __device__ static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
   if (!mb->use_mv) return;
   
   int w = cm->padw[color_component];
-
-  int tid = threadIdx.x + blockDim.x * threadIdx.y;
   
-  int y = (mb_y * 8) + (tid >> 3);
-  int x = (mb_x * 8) + (tid & 0x7);
+  int y = (mb_y * 8) + threadIdx.x;
+  int x = (mb_x * 8) + threadIdx.y;
   
-  /* Bank conflicts? Bank conflicts may not be a problem for global memory */
   predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
 }
 
 __device__ void c63_motion_compensate_gpu(struct c63_common *cm) {
-  int color_component = gridDim.z;
-  int mb_x = gridDim.x;
-  int mb_y = gridDim.y;
+  int color_component = blockIdx.z;
+  int mb_x = blockIdx.x;
+  int mb_y = blockIdx.y;
 
   __syncthreads();
 
@@ -184,31 +184,28 @@ __global__ void c63_estimate_compensate_gpu(struct c63_common *cm) {
 
 void c63_estimate_compensate(struct c63_common *cm) {
   /* Copy into device curframe original buffer */
-  cudaMemcpy(
+  cudaMemcpyErr(
     d_curframe_origbuf, 
     cm->curframe->orig->buf,
     cm->total_yuv_buflen,
     cudaMemcpyHostToDevice
   );
 
-  /* Copy into device refframe recons buffer */
-  cudaMemcpy(
+  cudaMemcpyErr(
     d_refframe_reconsbuf, 
     cm->refframe->recons->buf,
     cm->total_yuv_buflen,
     cudaMemcpyHostToDevice
   );
 
-
   dim3 grid(cm->mb_cols, cm->mb_rows, 3);
-  dim3 blk(32, 2, 1);
+  dim3 blk(8, 8, 1);
 
   c63_estimate_compensate_gpu<<<grid, blk>>>(d_cm);
-
-  cudaDeviceSynchronize();
+  cudaDevSyncErr();
 
   /* Copy back curframe predicted buffer to the host */
-  cudaMemcpy(
+  cudaMemcpyErr(
     cm->curframe->predicted->buf,
     d_curframe_predictedbuf,
     cm->total_yuv_buflen,  
@@ -216,21 +213,21 @@ void c63_estimate_compensate(struct c63_common *cm) {
   );
 
   /* Copy back current frame macroblocks (Y, U and V) */
-  cudaMemcpy(
+  cudaMemcpyErr(
     cm->curframe->mbs[Y_COMPONENT],
     d_curframe_mby,
     cm->y_mb_buflen, 
     cudaMemcpyDeviceToHost
   );
   
-  cudaMemcpy(
+  cudaMemcpyErr(
     cm->curframe->mbs[U_COMPONENT],
     d_curframe_mbu, 
     cm->u_mb_buflen, 
     cudaMemcpyDeviceToHost
   );
   
-  cudaMemcpy(
+  cudaMemcpyErr(
     cm->curframe->mbs[V_COMPONENT],
     d_curframe_mbv,
     cm->v_mb_buflen, 

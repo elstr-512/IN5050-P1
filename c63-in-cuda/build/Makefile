@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda
+CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build
+CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

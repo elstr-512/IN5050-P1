@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63dec.cu" "CMakeFiles/c63dec.dir/c63dec.cu.o" "gcc" "CMakeFiles/c63dec.dir/c63dec.cu.o.d"
+  "/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63dec.cu" "CMakeFiles/c63dec.dir/c63dec.cu.o" "gcc" "CMakeFiles/c63dec.dir/c63dec.cu.o.d"
   "" "c63dec" "gcc" "CMakeFiles/c63dec.dir/link.d"
   )
 

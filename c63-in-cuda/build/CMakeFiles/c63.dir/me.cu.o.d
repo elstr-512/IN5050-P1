@@ -1,4 +1,4 @@
-CMakeFiles/c63.dir/me.cu.o : /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/me.cu \
+CMakeFiles/c63.dir/me.cu.o : /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/me.cu \
     /usr/include/stdc-predef.h \
     /opt/cuda/bin/../targets/x86_64-linux/include/cuda_runtime.h \
     /opt/cuda/bin/../targets/x86_64-linux/include/crt/host_config.h \
@@ -174,6 +174,7 @@ CMakeFiles/c63.dir/me.cu.o : /home/littledragon/Skrivebord/IN5050/home_exam_1/IN
     /usr/include/bits/stdint-uintn.h \
     /usr/include/bits/stdint-least.h \
     /usr/include/inttypes.h \
-    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/me.h \
-    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63.h \
-    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/tables.h
+    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/common.h \
+    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63.h \
+    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/me.h \
+    /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/tables.h

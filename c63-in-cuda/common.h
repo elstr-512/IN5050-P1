@@ -12,4 +12,9 @@ void destroy_frame(struct frame *f);
 
 void dump_image(yuv_t *image, int w, int h, FILE *fp);
 
+void cudaMemcpyErr(void* dst, const void* src, size_t count, cudaMemcpyKind kind);
+void cudaMallocErr(void** devPtr, size_t size);
+void cudaFreeErr(void* devPtr);
+void cudaDevSyncErr(void);
+
 #endif  /* C63_COMMON_H_ */

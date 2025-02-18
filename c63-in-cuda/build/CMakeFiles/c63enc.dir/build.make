@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda
+CMAKE_SOURCE_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build
+CMAKE_BINARY_DIR = /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/c63enc.dir/depend.make
@@ -73,10 +73,10 @@ CMakeFiles/c63enc.dir/codegen:
 .PHONY : CMakeFiles/c63enc.dir/codegen
 
 CMakeFiles/c63enc.dir/c63enc.cu.o: CMakeFiles/c63enc.dir/flags.make
-CMakeFiles/c63enc.dir/c63enc.cu.o: /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63enc.cu
+CMakeFiles/c63enc.dir/c63enc.cu.o: /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63enc.cu
 CMakeFiles/c63enc.dir/c63enc.cu.o: CMakeFiles/c63enc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CUDA object CMakeFiles/c63enc.dir/c63enc.cu.o"
-	/opt/cuda/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/c63enc.dir/c63enc.cu.o -MF CMakeFiles/c63enc.dir/c63enc.cu.o.d -x cu -c /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63enc.cu -o CMakeFiles/c63enc.dir/c63enc.cu.o
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CUDA object CMakeFiles/c63enc.dir/c63enc.cu.o"
+	/opt/cuda/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/c63enc.dir/c63enc.cu.o -MF CMakeFiles/c63enc.dir/c63enc.cu.o.d -x cu -c /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63enc.cu -o CMakeFiles/c63enc.dir/c63enc.cu.o
 
 CMakeFiles/c63enc.dir/c63enc.cu.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CUDA source to CMakeFiles/c63enc.dir/c63enc.cu.i"
@@ -87,10 +87,10 @@ CMakeFiles/c63enc.dir/c63enc.cu.s: cmake_force
 	$(CMAKE_COMMAND) -E cmake_unimplemented_variable CMAKE_CUDA_CREATE_ASSEMBLY_SOURCE
 
 CMakeFiles/c63enc.dir/c63_write.cu.o: CMakeFiles/c63enc.dir/flags.make
-CMakeFiles/c63enc.dir/c63_write.cu.o: /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63_write.cu
+CMakeFiles/c63enc.dir/c63_write.cu.o: /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63_write.cu
 CMakeFiles/c63enc.dir/c63_write.cu.o: CMakeFiles/c63enc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CUDA object CMakeFiles/c63enc.dir/c63_write.cu.o"
-	/opt/cuda/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/c63enc.dir/c63_write.cu.o -MF CMakeFiles/c63enc.dir/c63_write.cu.o.d -x cu -c /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/c63_write.cu -o CMakeFiles/c63enc.dir/c63_write.cu.o
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CUDA object CMakeFiles/c63enc.dir/c63_write.cu.o"
+	/opt/cuda/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/c63enc.dir/c63_write.cu.o -MF CMakeFiles/c63enc.dir/c63_write.cu.o.d -x cu -c /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/c63_write.cu -o CMakeFiles/c63enc.dir/c63_write.cu.o
 
 CMakeFiles/c63enc.dir/c63_write.cu.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CUDA source to CMakeFiles/c63enc.dir/c63_write.cu.i"
@@ -116,7 +116,7 @@ c63enc: libc63.a
 c63enc: CMakeFiles/c63enc.dir/linkLibs.rsp
 c63enc: CMakeFiles/c63enc.dir/objects1.rsp
 c63enc: CMakeFiles/c63enc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CUDA executable c63enc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CUDA executable c63enc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/c63enc.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -128,6 +128,6 @@ CMakeFiles/c63enc.dir/clean:
 .PHONY : CMakeFiles/c63enc.dir/clean
 
 CMakeFiles/c63enc.dir/depend:
-	cd /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/build/CMakeFiles/c63enc.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/c63enc.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/c63enc.dir/depend
 

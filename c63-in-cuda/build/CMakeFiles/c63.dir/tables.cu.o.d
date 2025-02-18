@@ -1,4 +1,4 @@
-CMakeFiles/c63.dir/tables.cu.o : /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/in5050-codec63/c63-in-cuda/tables.cu \
+CMakeFiles/c63.dir/tables.cu.o : /home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/tables.cu \
     /usr/include/stdc-predef.h \
     /opt/cuda/bin/../targets/x86_64-linux/include/cuda_runtime.h \
     /opt/cuda/bin/../targets/x86_64-linux/include/crt/host_config.h \
