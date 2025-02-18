@@ -1,0 +1,6 @@
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/c63.dir
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/c63enc.dir
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/c63dec.dir
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/c63pred.dir
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/edit_cache.dir
+/home/littledragon/Skrivebord/IN5050/home_exam_1/IN5050-P1/c63-in-cuda/build/CMakeFiles/rebuild_cache.dir

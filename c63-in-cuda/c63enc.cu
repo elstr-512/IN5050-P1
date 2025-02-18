@@ -160,8 +160,8 @@ struct c63_common* init_c63_enc(int width, int height)
   cm->mb_cols = cm->ypw / 8;
   cm->mb_rows = cm->yph / 8;
 
-  cm->uv_mb_cols = cm->mb_cols / 4;
-  cm->uv_mb_rows = cm->mb_rows / 4;
+  cm->uv_mb_cols = cm->mb_cols / 2;
+  cm->uv_mb_rows = cm->mb_rows / 2;
 
   cm->y_mb_buflen = cm->mb_rows * cm->mb_cols * sizeof(struct macroblock);
   cm->u_mb_buflen = cm->y_mb_buflen / 4;
@@ -201,34 +201,34 @@ yuv_buf d_curframe_origbuf, d_refframe_reconsbuf,
 
 struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
 
-void init_device_state(struct c63_common *cm) {  
+void init_device_state(struct c63_common *cm) {
   /* Allocating necessary memory on the device */
-  cudaMalloc(&d_cm, sizeof(struct c63_common));
+  cudaMallocErr((void**)&d_cm, sizeof(struct c63_common));
 
-  cudaMalloc(&d_refframe, sizeof(struct frame));
-  cudaMalloc(&d_curframe, sizeof(struct frame));
-  
-  cudaMalloc(&d_curframe_orig, sizeof(struct yuv));
-  cudaMalloc(&d_refframe_recons, sizeof(struct yuv));
-  cudaMalloc(&d_curframe_predicted, sizeof(struct yuv));
+  cudaMallocErr((void**)&d_refframe, sizeof(struct frame));
+  cudaMallocErr((void**)&d_curframe, sizeof(struct frame));
 
-  cudaMalloc(&d_curframe_origbuf, cm->total_yuv_buflen);
-  cudaMalloc(&d_refframe_reconsbuf, cm->total_yuv_buflen);
-  cudaMalloc(&d_curframe_predictedbuf, cm->total_yuv_buflen);
+  cudaMallocErr((void**)&d_curframe_orig, sizeof(struct yuv));
+  cudaMallocErr((void**)&d_refframe_recons, sizeof(struct yuv));
+  cudaMallocErr((void**)&d_curframe_predicted, sizeof(struct yuv));
 
-  cudaMalloc(&d_curframe_mby, cm->y_mb_buflen);
-  cudaMalloc(&d_curframe_mbu, cm->u_mb_buflen);
-  cudaMalloc(&d_curframe_mbv, cm->v_mb_buflen);
+  cudaMallocErr((void**)&d_curframe_origbuf, cm->total_yuv_buflen);
+  cudaMallocErr((void**)&d_refframe_reconsbuf, cm->total_yuv_buflen);
+  cudaMallocErr((void**)&d_curframe_predictedbuf, cm->total_yuv_buflen);
+
+  cudaMallocErr((void**)&d_curframe_mby, cm->y_mb_buflen);
+  cudaMallocErr((void**)&d_curframe_mbu, cm->u_mb_buflen);
+  cudaMallocErr((void**)&d_curframe_mbv, cm->v_mb_buflen);
 
   /* Initializing device memory structures */
-  cudaMemcpy(d_cm, cm, sizeof(struct c63_common), cudaMemcpyHostToDevice);
+  cudaMemcpyErr(d_cm, cm, sizeof(struct c63_common), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(d_cm + offsetof(struct c63_common, refframe), &d_refframe, sizeof(d_refframe), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_cm + offsetof(struct c63_common, curframe), &d_curframe, sizeof(d_curframe), cudaMemcpyHostToDevice);
+  cudaMemcpyErr((uint8_t*)d_cm + offsetof(struct c63_common, refframe), &d_refframe, sizeof(d_refframe), cudaMemcpyHostToDevice);
+  cudaMemcpyErr((uint8_t*)d_cm + offsetof(struct c63_common, curframe), &d_curframe, sizeof(d_curframe), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(d_curframe + offsetof(struct frame, orig), &d_curframe_orig, sizeof(d_curframe_orig), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_refframe + offsetof(struct frame, recons), &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_curframe + offsetof(struct frame, predicted), &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
+  cudaMemcpyErr((uint8_t*)d_curframe + offsetof(struct frame, orig), &d_curframe_orig, sizeof(d_curframe_orig), cudaMemcpyHostToDevice);
+  cudaMemcpyErr((uint8_t*)d_refframe + offsetof(struct frame, recons), &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
+  cudaMemcpyErr((uint8_t*)d_curframe + offsetof(struct frame, predicted), &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
 
   struct yuv curframe_orig_yuv = {
     .Y   = (uint8_t*)d_curframe_origbuf,
@@ -251,42 +251,42 @@ void init_device_state(struct c63_common *cm) {
     .buf = d_curframe_predictedbuf
   };
 
-  cudaMemcpy(d_curframe_orig, &curframe_orig_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_refframe_recons, &refframe_recons_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_curframe_predicted, &curframe_predicted_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+  cudaMemcpyErr(d_curframe_orig, &curframe_orig_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+  cudaMemcpyErr(d_refframe_recons, &refframe_recons_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
+  cudaMemcpyErr(d_curframe_predicted, &curframe_predicted_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(
-    d_curframe + offsetof(struct frame, mbs), 
+  cudaMemcpyErr(
+    (uint8_t*)d_curframe + offsetof(struct frame, mbs), 
     &d_curframe_mby, sizeof(d_curframe_mby), 
     cudaMemcpyHostToDevice
   );
   
-  cudaMemcpy(
-    d_curframe + offsetof(struct frame, mbs) + sizeof(struct macroblock*), 
+  cudaMemcpyErr(
+    (uint8_t*)d_curframe + offsetof(struct frame, mbs) + sizeof(struct macroblock*), 
     &d_curframe_mbu, sizeof(d_curframe_mbu), 
     cudaMemcpyHostToDevice
   );
   
-  cudaMemcpy(
-    d_curframe + offsetof(struct frame, mbs) + 2 * sizeof(struct macroblock*), 
+  cudaMemcpyErr(
+    (uint8_t*)d_curframe + offsetof(struct frame, mbs) + 2 * sizeof(struct macroblock*), 
     &d_curframe_mbv, sizeof(d_curframe_mbv), 
     cudaMemcpyHostToDevice
   );
 }
 
 void fini_device_state() {
-  cudaFree(d_cm);
-  cudaFree(d_refframe);
-  cudaFree(d_curframe);
-  cudaFree(d_curframe_orig);
-  cudaFree(d_refframe_recons);
-  cudaFree(d_curframe_predicted);
-  cudaFree(d_curframe_origbuf);
-  cudaFree(d_refframe_reconsbuf);
-  cudaFree(d_curframe_predictedbuf);
-  cudaFree(d_curframe_mby);
-  cudaFree(d_curframe_mbu);
-  cudaFree(d_curframe_mbv);
+  cudaFreeErr(d_cm);
+  cudaFreeErr(d_refframe);
+  cudaFreeErr(d_curframe);
+  cudaFreeErr(d_curframe_orig);
+  cudaFreeErr(d_refframe_recons);
+  cudaFreeErr(d_curframe_predicted);
+  cudaFreeErr(d_curframe_origbuf);
+  cudaFreeErr(d_refframe_reconsbuf);
+  cudaFreeErr(d_curframe_predictedbuf);
+  cudaFreeErr(d_curframe_mby);
+  cudaFreeErr(d_curframe_mbu);
+  cudaFreeErr(d_curframe_mbv);
 }
 
 static void print_help()
