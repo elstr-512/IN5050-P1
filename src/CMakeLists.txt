@@ -69,7 +69,6 @@ add_executable(c63enc c63enc.cu c63.h c63_write.cu c63_write.h ${SRCS_C63})
 target_compile_options(c63enc PUBLIC -DCUDA_OPTIMIZATION)
 
 add_executable(c63dec c63dec.cu c63.h ${SRCS_C63})
-target_compile_options(c63dec PUBLIC "-g")
 
 add_executable(c63pred c63dec.cu c63.h ${SRCS_C63})
-target_compile_options(c63pred PUBLIC -DC63_PRED "-g")
+target_compile_options(c63pred PUBLIC -DC63_PRED)
