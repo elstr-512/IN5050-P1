@@ -53,28 +53,23 @@ else()
 endif()
 
 # This march option works with GCC but apparently not with the CUDA compiler on Tegra
-# if(EXISTS "/etc/nv_tegra_release")
-#     add_compile_options(-march=armv8.2-a)
-# endif()
+if(EXISTS "/etc/nv_tegra_release")
+    add_compile_options(-march=armv8.2-a)
+endif()
 
-add_library(c63
-            STATIC quantdct.cu quantdct.h
-	           tables.cu tables.h
-	           io.cu io.h
-	           common.cu common.h
-	           me.cu me.h)
+set (SRCS_C63
+  quantdct.cu quantdct.h
+  tables.cu tables.h
+  io.cu io.h
+  common.cu common.h
+  me.cu me.h
+)
 
-add_executable(c63enc
-               c63enc.cu c63.h
-	       c63_write.cu c63_write.h)
-target_link_libraries(c63enc c63 m)
+add_executable(c63enc c63enc.cu c63.h c63_write.cu c63_write.h ${SRCS_C63})
+target_compile_options(c63enc PUBLIC -DCUDA_OPTIMIZATION)
 
-add_executable(c63dec
-               c63dec.cu c63.h)
-target_link_libraries(c63dec c63 m)
+add_executable(c63dec c63dec.cu c63.h ${SRCS_C63})
+target_compile_options(c63dec PUBLIC "-g")
 
-add_executable(c63pred
-               c63dec.cu c63.h)
-target_link_libraries(c63pred c63 m)
-target_compile_options(c63pred PUBLIC -DC63_PRED)
-
+add_executable(c63pred c63dec.cu c63.h ${SRCS_C63})
+target_compile_options(c63pred PUBLIC -DC63_PRED "-g")

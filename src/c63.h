@@ -95,6 +95,9 @@ struct c63_common
 
   int padw[COLOR_COMPONENTS], padh[COLOR_COMPONENTS];
 
+  int mb_cols, mb_rows;
+
+#ifdef CUDA_OPTIMIZATION
   /* Sub buf lengths - custom addition to c63 */
   int y_buflen, u_buflen, v_buflen;
   int total_yuv_buflen; // Sum of y, u and v buflens 
@@ -105,8 +108,6 @@ struct c63_common
   /* Frame data lengths - custom addition to c63 */
   int y_datalen, u_datalen, v_datalen;
 
-  int mb_cols, mb_rows;
-
   int uv_mb_rows;
   int uv_mb_cols;
 
@@ -114,6 +115,7 @@ struct c63_common
   int y_mb_buflen;
   int u_mb_buflen;
   int v_mb_buflen;
+#endif
 
   uint8_t qp;                         // Quality parameter
 

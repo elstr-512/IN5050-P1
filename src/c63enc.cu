@@ -234,21 +234,21 @@ void init_device_state(struct c63_common *cm) {
     .Y   = (uint8_t*)d_curframe_origbuf,
     .U   = (uint8_t*)d_curframe_origbuf + cm->u_bufoff,
     .V   = (uint8_t*)d_curframe_origbuf + cm->v_bufoff,
-    .buf = d_curframe_origbuf
+    //.buf = d_curframe_origbuf
   };
 
   struct yuv refframe_recons_yuv = {
     .Y   = (uint8_t*)d_refframe_reconsbuf,
     .U   = (uint8_t*)d_refframe_reconsbuf + cm->u_bufoff,
     .V   = (uint8_t*)d_refframe_reconsbuf + cm->v_bufoff,
-    .buf = d_refframe_reconsbuf
+    //.buf = d_refframe_reconsbuf
   };
   
   struct yuv curframe_predicted_yuv = {
     .Y   = (uint8_t*)d_curframe_predictedbuf,
     .U   = (uint8_t*)d_curframe_predictedbuf + cm->u_bufoff,
     .V   = (uint8_t*)d_curframe_predictedbuf + cm->v_bufoff,
-    .buf = d_curframe_predictedbuf
+    //.buf = d_curframe_predictedbuf
   };
 
   cudaMemcpyErr(d_curframe_orig, &curframe_orig_yuv, sizeof(struct yuv), cudaMemcpyHostToDevice);

@@ -412,8 +412,10 @@ void decode_c63_frame(struct c63_common *cm, FILE *fout)
   /* Decode residuals */
   dequantize_idct(cm->curframe->residuals->Ydct, cm->curframe->predicted->Y,
       cm->ypw, cm->yph, cm->curframe->recons->Y, cm->quanttbl[0]);
+
   dequantize_idct(cm->curframe->residuals->Udct, cm->curframe->predicted->U,
       cm->upw, cm->uph, cm->curframe->recons->U, cm->quanttbl[1]);
+  
   dequantize_idct(cm->curframe->residuals->Vdct, cm->curframe->predicted->V,
       cm->vpw, cm->vph, cm->curframe->recons->V, cm->quanttbl[2]);
 
@@ -436,6 +438,7 @@ static void print_help(int argc, char **argv)
   exit(EXIT_FAILURE);
 }
 
+c63_common *cm;
 int main(int argc, char **argv)
 {
   if(argc < 3 || argc > 3) { print_help(argc, argv); }
@@ -449,7 +452,7 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  c63_common *cm = (c63_common*)calloc(1, sizeof(*cm));
+  cm = (c63_common*)calloc(1, sizeof(*cm));
   cm->e_ctx.fp = fin;
 
   int framenum = 0;
@@ -458,6 +461,7 @@ int main(int argc, char **argv)
     printf("Decoding frame %d\n", framenum++);
 
     parse_c63_frame(cm);
+
     decode_c63_frame(cm, fout);
   }
 
