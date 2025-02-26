@@ -19,10 +19,13 @@
 
 
 #ifdef CUDA_OPTIMIZATION
-
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
 /*                  CUDA SECTION                      */
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
+
+#define CEIL_DIV(x, y) (((x) + (y) - 1) / (y))
+#define MAX_MACROBLOCKS_COLS 2
+#define MAX_MACROBLOCKS_ROWS 2
 
 extern struct c63_common *d_cm;
 extern struct frame *d_refframe, *d_curframe;
@@ -44,7 +47,7 @@ __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int strid
 
   __syncwarp();
 
-  int shuffled_result = abs(block2[stride * threadIdx.y + threadIdx.x] - block1[stride * threadIdx.y + threadIdx.x]);
+  int shuffled_result = abs(block2[stride * threadIdx.x + threadIdx.y] - block1[stride * threadIdx.x + threadIdx.y]);
 
   for (int offset = 16; offset > 0; offset /= 2) {
     shuffled_result += __shfl_down_sync(SHUFFLE_FULL_MASK, shuffled_result, offset);
@@ -100,9 +103,9 @@ __device__ static void me_block_8x8(
   
   int best_sad = INT_MAX;
   
-  for (y = top; y < bottom; ++y)
+  for (y = top; y < bottom; y++)
   {
-    for (x = left; x < right; ++x)
+    for (x = left; x < right; x++)
     {
       int sad;
       sad_block_8x8(orig + my*w+mx, ref + y*w+x, w, &sad);
@@ -124,23 +127,52 @@ __device__ static void me_block_8x8(
 }
 
 __device__ void c63_motion_estimate_gpu(struct c63_common *cm) {
-  // /* Compare this frame with previous reconstructed frame */
-  int color_component = blockIdx.z;
-  int mb_x = blockIdx.x;
-  int mb_y = blockIdx.y;
+  /* Compare this frame with previous reconstructed frame */
+  int color_component     = blockIdx.z;
+  int megablock_col_start = blockIdx.x * MAX_MACROBLOCKS_COLS;
+  int megablock_row_start = blockIdx.y * MAX_MACROBLOCKS_ROWS;
+
+  /* Finding the max macroblocks indices for color components */
+  int max_mb_y;
+  int max_mb_x;
 
   if (color_component == 0) {
-    // Y component
-    me_block_8x8(cm, mb_x, mb_y, cm->curframe->orig->Y, cm->refframe->recons->Y, Y_COMPONENT);
-  } else if(color_component == 1) {
-    // U component
-    if (mb_x < cm->uv_mb_cols && mb_y < cm->uv_mb_rows) {
-      me_block_8x8(cm, mb_x, mb_y, cm->curframe->orig->U, cm->refframe->recons->U, U_COMPONENT); 
-    }
+    max_mb_y = cm->mb_rows;
+    max_mb_x = cm->mb_cols;
   } else {
-    // V component
-    if (mb_x < cm->uv_mb_cols && mb_y < cm->uv_mb_rows) {
-      me_block_8x8(cm, mb_x, mb_y, cm->curframe->orig->V, cm->refframe->recons->V, V_COMPONENT); 
+    max_mb_y = cm->uv_mb_rows;
+    max_mb_x = cm->uv_mb_cols;
+  }
+
+  /* Setting various fields for specific color components */
+  uint8_t *orig_buf;
+  uint8_t *recons_buf;
+
+  if (color_component == 0) {
+    // Y
+    orig_buf   = cm->curframe->orig->Y;
+    recons_buf = cm->refframe->recons->Y;
+  } else if (color_component == 1) {
+    // U
+    orig_buf   = cm->curframe->orig->U;
+    recons_buf = cm->refframe->recons->U;
+  } else {
+    // V
+    orig_buf   = cm->curframe->orig->V;
+    recons_buf = cm->refframe->recons->V;
+  }
+
+  for (int i = 0; i < MAX_MACROBLOCKS_ROWS; i++) {
+    int mb_y = megablock_row_start + i;
+
+    if (mb_y >= max_mb_y) { break; }
+
+    for (int j = 0; j < MAX_MACROBLOCKS_COLS; j++) {
+      int mb_x = megablock_col_start + j;
+    
+      if (mb_x >= max_mb_x) { break; }
+
+      me_block_8x8(cm, mb_x, mb_y, orig_buf, recons_buf, color_component);
     }
   }
 }
@@ -161,25 +193,55 @@ __device__ static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
   predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
 }
 
-__device__ void c63_motion_compensate_gpu(struct c63_common *cm) {
-  int color_component = blockIdx.z;
-  int mb_x = blockIdx.x;
-  int mb_y = blockIdx.y;
-
+__device__ void c63_motion_compensate_gpu(struct c63_common *cm) { 
   __syncthreads();
 
+  /* Compare this frame with previous reconstructed frame */
+  int color_component     = blockIdx.z;
+  int megablock_col_start = blockIdx.x * MAX_MACROBLOCKS_COLS;
+  int megablock_row_start = blockIdx.y * MAX_MACROBLOCKS_ROWS;
+
+  /* Finding the max macroblocks indices for color components */
+  int max_mb_y;
+  int max_mb_x;
+
   if (color_component == 0) {
-    // Y component
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->Y, cm->refframe->recons->Y, Y_COMPONENT);
-  } else if(color_component == 1) {
-    // U component
-    if (mb_x < cm->uv_mb_cols && mb_y < cm->uv_mb_rows) {
-      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->U, cm->refframe->recons->U, U_COMPONENT);
-    }
+    max_mb_y = cm->mb_rows;
+    max_mb_x = cm->mb_cols;
   } else {
-    // V component
-    if (mb_x < cm->uv_mb_cols && mb_y < cm->uv_mb_rows) {
-      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->V, cm->refframe->recons->V, V_COMPONENT);
+    max_mb_y = cm->uv_mb_rows;
+    max_mb_x = cm->uv_mb_cols;
+  }
+
+  /* Setting various fields for specific color components */
+  uint8_t *predicted_buf;
+  uint8_t *recons_buf;
+
+  if (color_component == 0) {
+    // Y
+    predicted_buf = cm->curframe->predicted->Y;
+    recons_buf    = cm->refframe->recons->Y;
+  } else if (color_component == 1) {
+    // U
+    predicted_buf = cm->curframe->predicted->U;
+    recons_buf    = cm->refframe->recons->U;
+  } else {
+    // V
+    predicted_buf = cm->curframe->predicted->V;
+    recons_buf    = cm->refframe->recons->V;
+  }
+
+  for (int i = 0; i < MAX_MACROBLOCKS_ROWS; i++) {
+    int mb_y = megablock_row_start + i;
+
+    if (mb_y >= max_mb_y) { break; }
+
+    for (int j = 0; j < MAX_MACROBLOCKS_COLS; j++) {
+      int mb_x = megablock_col_start + j;
+    
+      if (mb_x >= max_mb_x) { break; }
+
+      mc_block_8x8(cm, mb_x, mb_y, predicted_buf, recons_buf, color_component);
     }
   }
 }
@@ -205,7 +267,11 @@ void c63_estimate_compensate(struct c63_common *cm) {
     cudaMemcpyHostToDevice
   );
 
-  dim3 grid(cm->mb_cols, cm->mb_rows, 3);
+  /* Basically we have threadblocks that perform SAD computations on 4x4 macroblocks each*/
+  int macroblock_grid_cols = CEIL_DIV(cm->mb_cols, MAX_MACROBLOCKS_COLS);
+  int macroblock_grid_rows = CEIL_DIV(cm->mb_rows, MAX_MACROBLOCKS_ROWS);
+
+  dim3 grid(macroblock_grid_cols, macroblock_grid_rows, 3);
   dim3 blk(8, 8, 1);
 
   c63_estimate_compensate_gpu<<<grid, blk>>>(d_cm);
@@ -241,6 +307,51 @@ void c63_estimate_compensate(struct c63_common *cm) {
     cudaMemcpyDeviceToHost
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #else
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
 /*         Motion (normal) Compensate Section         */
@@ -252,55 +363,55 @@ void c63_estimate_compensate(struct c63_common *cm) {
 static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
   uint8_t *predicted, uint8_t *ref, int color_component)
 {
-struct macroblock *mb =
-  &cm->curframe->mbs[color_component][mb_y*cm->padw[color_component]/8+mb_x];
+  struct macroblock *mb =
+    &cm->curframe->mbs[color_component][mb_y*cm->padw[color_component]/8+mb_x];
 
-if (!mb->use_mv) { return; }
+  if (!mb->use_mv) { return; }
 
-int left = mb_x * 8;
-int top = mb_y * 8;
-int right = left + 8;
-int bottom = top + 8;
+  int left = mb_x * 8;
+  int top = mb_y * 8;
+  int right = left + 8;
+  int bottom = top + 8;
 
-int w = cm->padw[color_component];
+  int w = cm->padw[color_component];
 
-/* Copy block from ref mandated by MV */
-int x, y;
+  /* Copy block from ref mandated by MV */
+  int x, y;
 
-for (y = top; y < bottom; ++y)
-{
-  for (x = left; x < right; ++x)
+  for (y = top; y < bottom; ++y)
   {
-    predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
+    for (x = left; x < right; ++x)
+    {
+      predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
+    }
   }
-}
 }
 
 void c63_motion_compensate(struct c63_common *cm)
 {
-int mb_x, mb_y;
-
-/* Luma */
-for (mb_y = 0; mb_y < cm->mb_rows; ++mb_y)
-{
-  for (mb_x = 0; mb_x < cm->mb_cols; ++mb_x)
+  int mb_x, mb_y;
+  
+  /* Luma */
+  for (mb_y = 0; mb_y < cm->mb_rows; ++mb_y)
   {
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->Y,
-        cm->refframe->recons->Y, Y_COMPONENT);
+    for (mb_x = 0; mb_x < cm->mb_cols; ++mb_x)
+    {
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->Y,
+          cm->refframe->recons->Y, Y_COMPONENT);
+    }
   }
-}
-
-/* Chroma */
-for (mb_y = 0; mb_y < cm->mb_rows / 2; ++mb_y)
-{
-  for (mb_x = 0; mb_x < cm->mb_cols / 2; ++mb_x)
+  
+  /* Chroma */
+  for (mb_y = 0; mb_y < cm->mb_rows / 2; ++mb_y)
   {
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->U,
-        cm->refframe->recons->U, U_COMPONENT);
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->V,
-        cm->refframe->recons->V, V_COMPONENT);
+    for (mb_x = 0; mb_x < cm->mb_cols / 2; ++mb_x)
+    {
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->U,
+          cm->refframe->recons->U, U_COMPONENT);
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->V,
+          cm->refframe->recons->V, V_COMPONENT);
+    }
   }
-}
 }
 
 #endif // CUDA_OPTIMIZATION
