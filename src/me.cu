@@ -20,6 +20,8 @@
 
 #ifdef CUDA_OPTIMIZATION
 
+#define CEIL_DIV(x, y) (((x) + (y) - 1) / (y))
+
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
 /*                  CUDA SECTION                      */
 /* ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~ */
@@ -126,8 +128,8 @@ __device__ static void me_block_8x8(
 __device__ void c63_motion_estimate_gpu(struct c63_common *cm) {
   // /* Compare this frame with previous reconstructed frame */
   int color_component = blockIdx.z;
-  int mb_x = blockIdx.x;
-  int mb_y = blockIdx.y;
+  int mb_x = blockIdx.x * 4 + (threadIdx.z & 0b11);
+  int mb_y = blockIdx.y * 4 + (threadIdx.z >> 2);
 
   if (color_component == 0) {
     // Y component
@@ -144,6 +146,14 @@ __device__ void c63_motion_estimate_gpu(struct c63_common *cm) {
     }
   }
 }
+
+
+
+
+
+
+
+
 
 /* Motion compensation for 8x8 block */
 __device__ static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
@@ -163,8 +173,11 @@ __device__ static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
 
 __device__ void c63_motion_compensate_gpu(struct c63_common *cm) {
   int color_component = blockIdx.z;
-  int mb_x = blockIdx.x;
-  int mb_y = blockIdx.y;
+  int mb_x = (blockIdx.x * 4) + (threadIdx.z & 0b11);
+  int mb_y = (blockIdx.y * 4) + (threadIdx.z >> 2);
+
+  if (mb_x >= 43 && mb_y >= 35)
+  printf("Mb_x mb_y : %d %d\n", mb_x, mb_y);
 
   __syncthreads();
 
@@ -205,8 +218,8 @@ void c63_estimate_compensate(struct c63_common *cm) {
     cudaMemcpyHostToDevice
   );
 
-  dim3 grid(cm->mb_cols, cm->mb_rows, 3);
-  dim3 blk(8, 8, 1);
+  dim3 grid(CEIL_DIV(cm->mb_cols, 4), CEIL_DIV(cm->mb_rows, 4), 3);
+  dim3 blk(8, 8, 16);
 
   c63_estimate_compensate_gpu<<<grid, blk>>>(d_cm);
   cudaDevSyncErr();
@@ -252,55 +265,55 @@ void c63_estimate_compensate(struct c63_common *cm) {
 static void mc_block_8x8(struct c63_common *cm, int mb_x, int mb_y,
   uint8_t *predicted, uint8_t *ref, int color_component)
 {
-struct macroblock *mb =
-  &cm->curframe->mbs[color_component][mb_y*cm->padw[color_component]/8+mb_x];
+  struct macroblock *mb =
+    &cm->curframe->mbs[color_component][mb_y*cm->padw[color_component]/8+mb_x];
 
-if (!mb->use_mv) { return; }
+  if (!mb->use_mv) { return; }
 
-int left = mb_x * 8;
-int top = mb_y * 8;
-int right = left + 8;
-int bottom = top + 8;
+  int left = mb_x * 8;
+  int top = mb_y * 8;
+  int right = left + 8;
+  int bottom = top + 8;
 
-int w = cm->padw[color_component];
+  int w = cm->padw[color_component];
 
-/* Copy block from ref mandated by MV */
-int x, y;
+  /* Copy block from ref mandated by MV */
+  int x, y;
 
-for (y = top; y < bottom; ++y)
-{
-  for (x = left; x < right; ++x)
+  for (y = top; y < bottom; ++y)
   {
-    predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
+    for (x = left; x < right; ++x)
+    {
+      predicted[y*w+x] = ref[(y + mb->mv_y) * w + (x + mb->mv_x)];
+    }
   }
-}
 }
 
 void c63_motion_compensate(struct c63_common *cm)
 {
-int mb_x, mb_y;
+  int mb_x, mb_y;
 
-/* Luma */
-for (mb_y = 0; mb_y < cm->mb_rows; ++mb_y)
-{
-  for (mb_x = 0; mb_x < cm->mb_cols; ++mb_x)
+  /* Luma */
+  for (mb_y = 0; mb_y < cm->mb_rows; ++mb_y)
   {
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->Y,
-        cm->refframe->recons->Y, Y_COMPONENT);
+    for (mb_x = 0; mb_x < cm->mb_cols; ++mb_x)
+    {
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->Y,
+          cm->refframe->recons->Y, Y_COMPONENT);
+    }
   }
-}
 
-/* Chroma */
-for (mb_y = 0; mb_y < cm->mb_rows / 2; ++mb_y)
-{
-  for (mb_x = 0; mb_x < cm->mb_cols / 2; ++mb_x)
+  /* Chroma */
+  for (mb_y = 0; mb_y < cm->mb_rows / 2; ++mb_y)
   {
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->U,
-        cm->refframe->recons->U, U_COMPONENT);
-    mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->V,
-        cm->refframe->recons->V, V_COMPONENT);
+    for (mb_x = 0; mb_x < cm->mb_cols / 2; ++mb_x)
+    {
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->U,
+          cm->refframe->recons->U, U_COMPONENT);
+      mc_block_8x8(cm, mb_x, mb_y, cm->curframe->predicted->V,
+          cm->refframe->recons->V, V_COMPONENT);
+    }
   }
-}
 }
 
 #endif // CUDA_OPTIMIZATION
