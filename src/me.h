@@ -6,7 +6,6 @@
 #ifdef CUDA_OPTIMIZATION
 void c63_estimate_compensate(struct c63_common *cm);
 #else
-// void c63_motion_estimate(struct c63_common *cm);
 void c63_motion_compensate(struct c63_common *cm);
 #endif
 

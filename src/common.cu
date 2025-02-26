@@ -152,6 +152,7 @@ static void printCudaErrReadable(cudaError_t err) {
   }
 }
 
+/* Memcpy with error check */
 void cudaMemcpyErr(void *dst, const void *src, size_t count,
                    cudaMemcpyKind kind) {
   cudaError_t err = cudaMemcpy(dst, src, count, kind);
@@ -163,6 +164,7 @@ void cudaMemcpyErr(void *dst, const void *src, size_t count,
   }
 }
 
+/* cudaMalloc with error check */
 void cudaMallocErr(void **devPtr, size_t size) {
   cudaError_t err = cudaMalloc(devPtr, size);
   if (err != cudaSuccess) {
@@ -172,6 +174,7 @@ void cudaMallocErr(void **devPtr, size_t size) {
   }
 }
 
+/* cudaFree with error check */
 void cudaFreeErr(void *devPtr) {
   cudaError_t err = cudaFree(devPtr);
 
@@ -182,6 +185,7 @@ void cudaFreeErr(void *devPtr) {
   }
 }
 
+/* cudaSync with error check */
 void cudaDevSyncErr() {
   cudaError_t err = cudaDeviceSynchronize();
   if (err != cudaSuccess) {
