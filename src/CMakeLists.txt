@@ -37,9 +37,10 @@ endif()
 
 # Debug compiles with -g or equivalent for debugging.
 # Change to Release for good speed.
-set(CMAKE_BUILD_TYPE Debug)
-# set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
+add_compile_options("-arch=sm_50 -gencode=arch=compute_50,code=sm_50")
 #
 # If this is a Tegra or something similar, set our processor subrevision.
 # On Mac, CMake adds arch flags by itself.
