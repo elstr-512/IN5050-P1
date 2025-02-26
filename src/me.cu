@@ -36,11 +36,11 @@ extern struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
 
 __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int stride, int *result)
 {
-  __shared__ int part_sad_sums[2]; // NOTE: shared? partial sad sums
+  __shared__ int part_sad_sums[2];
 
   int tid = threadIdx.x + threadIdx.y * blockDim.x;
-  int lane_index = tid & 0x1f; // NOTE: what.
-  int warp_index = tid / 32; // NOTE: what. >> 5
+  int lane_index = tid & 0x1f;
+  int warp_index = tid / 32;
 
   __syncwarp();
 
@@ -71,7 +71,7 @@ __device__ static void me_block_8x8(
   int color_component
 )
 {
-  int tid = threadIdx.x + threadIdx.y * blockDim.x; // NOTE: how does this expr evaluate?
+  int tid = threadIdx.x + threadIdx.y * blockDim.x;
 
   struct macroblock *mb = &cm->curframe->mbs[color_component][mb_y*cm->padw[color_component]/8+mb_x];
 
@@ -107,7 +107,7 @@ __device__ static void me_block_8x8(
       int sad;
       sad_block_8x8(orig + my*w+mx, ref + y*w+x, w, &sad);
 
-      if (tid == 0) { // NOTE: why is thread id 0?
+      if (tid == 0) {
         if (sad < best_sad)
         {
           mb->mv_x = x - mx;
@@ -118,14 +118,14 @@ __device__ static void me_block_8x8(
     }
   }
   
-  if (tid == 0) { // NOTE: why is thread id 0? Only one thread should update
+  if (tid == 0) {
     mb->use_mv = 1;
   }
 }
 
 __device__ void c63_motion_estimate_gpu(struct c63_common *cm) {
   // /* Compare this frame with previous reconstructed frame */
-  int color_component = blockIdx.z; // NOTE: nice :)
+  int color_component = blockIdx.z;
   int mb_x = blockIdx.x;
   int mb_y = blockIdx.y;
 
@@ -189,9 +189,6 @@ __global__ void c63_estimate_compensate_gpu(struct c63_common *cm) {
   c63_motion_compensate_gpu(cm);
 }
 
-/**
-This gets called once per framer right?
-*/
 void c63_estimate_compensate(struct c63_common *cm) {
   /* Copy into device curframe original buffer */
   cudaMemcpyErr(
@@ -208,12 +205,10 @@ void c63_estimate_compensate(struct c63_common *cm) {
     cudaMemcpyHostToDevice
   );
 
-  // grid and dim based on the macroblocks, fair enough
   dim3 grid(cm->mb_cols, cm->mb_rows, 3);
   dim3 blk(8, 8, 1);
 
   c63_estimate_compensate_gpu<<<grid, blk>>>(d_cm);
-  // NOTE: do we do anyting with the syncerr?
   cudaDevSyncErr();
 
   /* Copy back curframe predicted buffer to the host */

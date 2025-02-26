@@ -191,8 +191,6 @@ void free_c63_enc(struct c63_common* cm)
   free(cm);
 }
 
-// NOTE: why not do this in me.cu?
-
 struct c63_common *d_cm;
 struct frame *d_refframe, *d_curframe;
 
@@ -205,8 +203,6 @@ struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
 
 void init_device_state(struct c63_common *cm) {
   /* Allocating necessary memory on the device */
-  // iknow that this is what the previous code does,
-  // but is it necsecarry to bring over the whole cm-encoder?
   cudaMallocErr((void**)&d_cm, sizeof(struct c63_common));
 
   cudaMallocErr((void**)&d_refframe, sizeof(struct frame));
@@ -234,7 +230,6 @@ void init_device_state(struct c63_common *cm) {
   cudaMemcpyErr((uint8_t*)d_refframe + offsetof(struct frame, recons), &d_refframe_recons, sizeof(d_refframe_recons), cudaMemcpyHostToDevice);
   cudaMemcpyErr((uint8_t*)d_curframe + offsetof(struct frame, predicted), &d_curframe_predicted, sizeof(d_curframe_predicted), cudaMemcpyHostToDevice);  
 
-  // NOTE: who do we not care about the buffer?
   struct yuv curframe_orig_yuv = {
     .Y   = (uint8_t*)d_curframe_origbuf,
     .U   = (uint8_t*)d_curframe_origbuf + cm->u_bufoff,
