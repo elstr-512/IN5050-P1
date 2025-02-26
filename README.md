@@ -19,8 +19,11 @@ make
 
 To encode a video:
 
+Foreman 
 ./c63enc -w 352 -h 288 -f <frames max 300> -o out-file.c63 <in-file>.yuv
 
+Tractor
+./c63enc -w 1980 -h 1080 -f <frames max 300> -o out-file.c63 <in-file>.yuv
 
 To decode the c63 file:
 
@@ -31,6 +34,7 @@ Tip! Use mplayer or ffplay to playback raw YUV file:
 Playback
 Foreman
 mplayer -demuxer rawvideo -rawvideo w=352:h=288 output.yuv
+
 Tractor
 mplayer -demuxer rawvideo -rawvideo w=1920:h=1080 output.yuv
 

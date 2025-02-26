@@ -40,7 +40,6 @@ endif()
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 
-add_compile_options("-arch=sm_50 -gencode=arch=compute_50,code=sm_50")
 #
 # If this is a Tegra or something similar, set our processor subrevision.
 # On Mac, CMake adds arch flags by itself.
@@ -52,6 +51,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL GNU)
 else()
   message(FATAL "Not compiling with an gcc")
 endif()
+add_compile_options(-arch=sm_50 -gencode=arch=compute_50,code=sm_50)
 
 # This march option works with GCC but apparently not with the CUDA compiler on Tegra
 if(EXISTS "/etc/nv_tegra_release")
