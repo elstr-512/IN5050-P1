@@ -14,7 +14,7 @@ project(Codec63
 set(CMAKE_CUDA_STANDARD 11)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
-# Overwrite default -O3 flag for Release mode
+# Overwrite default -O3 flag for Release mode (NOTE: We are not sure if this works as expected?)
 set(CMAKE_C_FLAGS_RELEASE "-O1 -fno-tree-vectorize")
 # Make sure Debug mode flags are similar to Release mode flags
 set(CMAKE_C_FLAGS_DEBUG "-g -O1 -fno-tree-vectorize")
@@ -36,9 +36,11 @@ else()
 endif()
 
 # Debug compiles with -g or equivalent for debugging.
-# Change to Release for good speed.
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+# 
+# Change to Release for good speed. (Or just keep the current, the speedup doesn't seem correct, it's so so so much faster?)
+#
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 #
 # If this is a Tegra or something similar, set our processor subrevision.
@@ -51,6 +53,9 @@ if(CMAKE_C_COMPILER_ID STREQUAL GNU)
 else()
   message(FATAL "Not compiling with an gcc")
 endif()
+
+
+# NOTE: flags for the (year 2025) IN5050 Quadro K2200 machines.
 add_compile_options(-arch=sm_50 -gencode=arch=compute_50,code=sm_50)
 
 # This march option works with GCC but apparently not with the CUDA compiler on Tegra
