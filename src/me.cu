@@ -38,7 +38,7 @@ extern struct macroblock *d_curframe_mby, *d_curframe_mbu, *d_curframe_mbv;
 
 __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int stride, int *result)
 {
-  __shared__ int part_sad_sums[2];
+  __shared__ int part_sad_sums[32];
 
   int tid = threadIdx.x + threadIdx.y * blockDim.x;
   int lane_index = tid & 0x1f;
@@ -54,12 +54,12 @@ __device__ static void sad_block_8x8(uint8_t *block1, uint8_t *block2, int strid
 
   __syncwarp();
   if (lane_index == 0) {
-    part_sad_sums[warp_index] = shuffled_result;
+    part_sad_sums[threadIdx.z * 2 + warp_index] = shuffled_result;
   }
 
   __syncthreads();
   if (tid == 0){
-    *result = part_sad_sums[0] + part_sad_sums[1];
+    *result = part_sad_sums[threadIdx.z * 2] + part_sad_sums[threadIdx.z * 2 + 1];
   }
 }
 
@@ -175,9 +175,6 @@ __device__ void c63_motion_compensate_gpu(struct c63_common *cm) {
   int color_component = blockIdx.z;
   int mb_x = (blockIdx.x * 4) + (threadIdx.z & 0b11);
   int mb_y = (blockIdx.y * 4) + (threadIdx.z >> 2);
-
-  if (mb_x >= 43 && mb_y >= 35)
-  printf("Mb_x mb_y : %d %d\n", mb_x, mb_y);
 
   __syncthreads();
 
